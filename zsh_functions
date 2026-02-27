@@ -1,0 +1,65 @@
+vmls () {
+    VBoxManage list vms
+}
+
+vmkill () {
+    if [[ ${1} == "--help" ]]; then
+        echo "Usage: \n\tvmstart {vm-name}"
+        return
+    fi
+    _vmname=${1}
+    vboxmanage controlvm ${_vmname} poweroff hard
+}
+
+vmstart () {
+    if [[ ${1} == "--help" ]]; then
+        echo "Usage: \n\tvmstart <vm-name>"
+        return
+    fi
+    _vmname=${1}
+    if [ -z "${_vmname}" ]; then
+        echo "Must be called with VM name as argument" 1>&2
+        return
+    fi
+    VBoxManage startvm ${_vmname} --type headless
+}
+
+vmnat () {
+    if [[ ${1} == "--help" ]]; then
+        echo "Usage: \n\tvmnat <vm-name> <nat-rulename> <guest-port> <host-port>"
+        return
+    fi
+    _vmname=${1}
+    _rulename=${2}
+    _protocol="tcp"
+    _guestport=${3}
+    _hostport=${4}
+    VBoxManage modifyvm ${_vmname} --natpf1 "${_rulename},tcp,,${_hostport},,${_guestport}"
+}
+
+md5check () {
+  _file=${1}
+  _md5sum=${2}
+  _cmd="echo \"${_md5sum} ${_file}\" | md5sum -c -"
+  eval $_cmd
+}
+
+ydl () {
+    if [[ ${1} == "--help" ]]; then
+        echo "Usage: \n\ydl [single/playlist] <url>"
+        return
+    fi
+    _cmd=${1}
+    _url=${2}
+    if [[ ${_cmd} == "single" ]]; then
+        youtube-dl --extract-audio --audio-quality 0 --audio-format vorbis --no-playlist -o '%(title)s.%(ext)s' ${_url}
+    elif [[ ${_cmd} == "playlist" ]]; then
+        youtube-dl --extract-audio --audio-quality 0 --audio-format vorbis -o '%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' ${_url} -i
+    else
+        echo "Command [${_cmd}] not found!"
+    fi
+}
+
+sreplace () {
+  find ./ -type f -exec sed -i "s/${1}/${2}/g" {} \;
+}

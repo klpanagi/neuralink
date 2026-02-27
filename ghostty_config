@@ -1,0 +1,59 @@
+# -----------------------------------------------------------------------------
+# GHOSTTY PROFESSIONAL CONFIG (v1.2.0+ Compliant)
+# -----------------------------------------------------------------------------
+
+# --- Appearance & Themes ---
+# Ghostty 1.2+ uses Title Case for built-in themes.
+# This automatically switches based on your System Dark/Light mode.
+theme = Catppuccin Mocha
+
+font-family = "JetBrains Mono"
+font-size = 11
+font-feature = -calt      # Disables ligatures (preferred by many for precise alignment)
+adjust-cell-height = 15%
+
+# --- Window Styling ---
+background-opacity = 0.92
+background-blur = 20
+window-padding-x = 12
+window-padding-y = 12
+window-decoration = true
+confirm-close-surface = false
+
+# --- Cursor ---
+cursor-style = block
+cursor-style-blink = false
+cursor-invert-fg-bg = true
+
+# --- Performance & Features ---
+shell-integration = detect
+clipboard-read = allow
+clipboard-write = allow
+copy-on-select = clipboard
+mouse-hide-while-typing = true
+
+# --- Keybindings: Multi-tasking like a Pro ---
+# Note: 'super' is Cmd on Mac, Win-key on Linux.
+
+keybind = ctrl+shift+v=paste_from_clipboard
+
+# Quick Splits
+keybind = super+d=new_split:right
+keybind = super+shift+d=new_split:down
+keybind = super+w=close_surface
+
+# Navigation: Use HJKL (Vim-style) to jump between splits
+keybind = super+ctrl+h=goto_split:left
+keybind = super+ctrl+l=goto_split:right
+keybind = super+ctrl+k=goto_split:up
+keybind = super+ctrl+j=goto_split:down
+
+# Tabs
+keybind = super+t=new_tab
+keybind = super+1=goto_tab:1
+keybind = super+2=goto_tab:2
+keybind = super+3=goto_tab:3
+
+# Utility
+keybind = super+ctrl+r=reload_config
+keybind = super+f=copy_url_to_clipboard

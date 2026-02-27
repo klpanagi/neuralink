@@ -1,0 +1,72 @@
+alias get_esp32="export PATH=$PATH:$HOME/development/esp32/xtensa-esp32-elf/bin && export IDF_PATH=$HOME/development/esp32/esp-idf"
+
+if [[ $(uname -r) == *ARCH* ]] || [[ $(uname -r) == *MANJARO* ]]; then
+    alias paci="sudo pacman -S"
+    alias pacupgrade="sudo pacman -Syu"
+    alias pacremove="sudo pacman -R"
+    alias pacautoremove="sudo pacman -Rs"
+    alias pacpurge="sudo pacman -Rsc"
+    alias paclog="less /var/log/pacman.log"
+    alias psearch="sudo pacman -Ss"
+    alias porphans="sudo pacman -Qdt"
+    alias paclean="sudo pacman -Sc"
+    alias pacsync="sudo pacman -Syy"
+    alias pacmirrors="sudo pacman-mirrors --fasttrack 5 && sudo pacman -Syyu"
+else
+    alias install="sudo apt-get install"
+    alias update="sudo apt-get update"
+    alias upgrade="sudo apt-get upgrade"
+    alias remove="sudo apt-get remove"
+fi
+
+alias c="clear"
+
+if command -v eza &>/dev/null; then
+    alias ls='eza --icons --group-directories-first'
+    alias ll='eza -lh --icons --group-directories-first'
+    alias la='eza -lah --icons --group-directories-first'
+    alias lr='eza -lR --icons --group-directories-first'
+    alias lt='eza -lh --sort=modified --icons --group-directories-first'
+    alias lk='eza -lh --sort=size --icons --group-directories-first'
+    alias tree='eza --tree --icons'
+    alias tree1='eza --tree --level=1 --icons'
+    alias tree2='eza --tree --level=2 --icons'
+    alias tree3='eza --tree --level=3 --icons'
+else
+    alias ll='ls -lh'
+    alias la='ll -A'
+    alias lr='ll -R'
+    alias lt='ll -tr'
+    alias lk='ll -Sr'
+    alias tree1="tree -L 1"
+    alias tree2="tree -L 2"
+    alias tree3="tree -L 3"
+fi
+
+if command -v bat &>/dev/null; then
+    alias catp='bat'
+    alias batdiff='bat --diff'
+fi
+
+if command -v dust &>/dev/null; then
+    alias duf='dust'
+fi
+
+if command -v btop &>/dev/null; then
+    alias htop='btop'
+fi
+
+alias myip="dig +short myip.opendns.com @resolver1.opendns.com"
+alias tcp="ss -antp"
+alias udp="ss -anup"
+alias findps="ps aux | grep"
+
+alias tmux="tmux -2"
+
+alias gst='git status -s'
+alias gp='git push'
+alias gc='git commit -v'
+alias gf='git fetch'
+alias gl='git log --oneline --graph --decorate -20'
+alias gd='git diff'
+alias gds='git diff --staged'
