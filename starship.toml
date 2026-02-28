@@ -1,6 +1,8 @@
 # Starship prompt — Catppuccin Mocha palette
 # https://starship.rs/config/
 
+palette = "catppuccin_mocha"
+
 format = """
 $directory\
 $git_branch\
@@ -79,7 +81,7 @@ format = "[$symbol$context]($style) "
 symbol = " "
 only_with_files = true
 
-[palette]
+[palettes.catppuccin_mocha]
 # Catppuccin Mocha
 rosewater = "#f5e0dc"
 flamingo = "#f2cdcd"
