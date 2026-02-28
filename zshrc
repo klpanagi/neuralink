@@ -135,7 +135,7 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=38"
 
 bindkey -v
 bindkey -M viins 'jk' vi-cmd-mode
-bindkey '^R' history-incremental-search-backward
+# ^R handled by atuin (line ~204)
 bindkey '^W' backward-kill-word
 bindkey '^[[1;5D' backward-word
 bindkey '^[[1;5C' forward-word
