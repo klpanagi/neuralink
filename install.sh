@@ -394,6 +394,8 @@ setup_symlinks() {
     create_symlink "$REPO_DIR/zsh_functions"  "$HOME/.zsh_functions"             "zsh_functions"
     create_symlink "$REPO_DIR/tmux.conf"      "$HOME/.tmux.conf"                 "tmux.conf"
     create_symlink "$REPO_DIR/ghostty_config" "$HOME/.config/ghostty/config"     "ghostty_config"
+    create_symlink "$REPO_DIR/init.lua"      "$HOME/.config/nvim/init.lua"      "init.lua"
+    create_symlink "$REPO_DIR/starship.toml" "$HOME/.config/starship.toml"      "starship.toml"
 
     echo ""
     info "Existing config files were backed up to:"

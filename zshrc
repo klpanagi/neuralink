@@ -41,7 +41,6 @@ setopt hist_reduce_blanks
 setopt hist_save_no_dups
 setopt share_history
 
-CASE_SENSITIVE="true"
 DISABLE_AUTO_UPDATE="true"
 DISABLE_AUTO_TITLE="true"
 ENABLE_CORRECTION="true"
@@ -72,7 +71,16 @@ zinit snippet OMZP::colored-man-pages
 zstyle :omz:plugins:ssh-agent quiet yes
 zstyle :omz:plugins:ssh-agent lazy yes
 zinit snippet OMZP::ssh-agent
-zinit snippet OMZP::vi-mode
+# vi-mode: explicit cursor shape (lighter than OMZ vi-mode snippet)
+function zle-keymap-select() {
+  case $KEYMAP in
+    vicmd)      echo -ne '\e[2 q' ;;  # block cursor
+    viins|main) echo -ne '\e[6 q' ;;  # beam cursor
+  esac
+}
+zle -N zle-keymap-select
+function zle-line-init() { echo -ne '\e[6 q' }
+zle -N zle-line-init
 zinit snippet OMZP::pip
 command -v docker >/dev/null 2>&1 && zinit snippet OMZP::docker
 
@@ -87,16 +95,23 @@ zinit light wfxr/forgit
 
 zmodload zsh/terminfo
 zmodload zsh/zpty
-zmodload zsh/nearcolor
 
 fpath+=~/.zfunc
 autoload -Uz compinit && compinit
 zinit cdreplay -q
 
 zstyle ':completion:*' menu no
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompcache"
+zstyle ':completion:*' rehash true
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons $realpath 2>/dev/null || ls -1 --color=always $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza -1 --color=always --icons $realpath 2>/dev/null || ls -1 --color=always $realpath'
 zstyle ':fzf-tab:*' fzf-flags --height=40% --layout=reverse --border
+zstyle ':fzf-tab:*' switch-group '<' '>'
+zstyle ':fzf-tab:complete:kill:argument-rest' fzf-preview 'ps -p $word -o comm,pid,ppid,user,%cpu,%mem,etime'
+zstyle ':fzf-tab:complete:systemctl-*:*' fzf-preview 'SYSTEMD_COLORS=1 systemctl status $word'
 
 forgit_log=glo
 forgit_diff=gd
@@ -126,7 +141,9 @@ bindkey '^[[1;5D' backward-word
 bindkey '^[[1;5C' forward-word
 
 typeset -g ZSH_SYSTEM_CLIPBOARD_TMUX_SUPPORT='true'
-typeset -g ZSH_SYSTEM_CLIPBOARD_SELECTION='PRIMARY'
+typeset -g ZSH_SYSTEM_CLIPBOARD_SELECTION='CLIPBOARD'
+
+WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 
 command -v nvim >/dev/null 2>&1 &&
   { export EDITOR="nvim"; alias vim="nvim" } || export EDITOR="vim"

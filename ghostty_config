@@ -72,3 +72,11 @@ keybind = alt+shift+i=inspector:toggle
 keybind = alt+shift+s=write_screen_file:open
 keybind = alt+ctrl+r=reload_config
 keybind = alt+f=copy_url_to_clipboard
+
+# --- Performance ---
+gtk-single-instance = true
+
+# --- v1.2.0 Features ---
+background-opacity-cells = true
+font-shaping-break = cursor
+mouse-shift-capture = never
