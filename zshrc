@@ -69,7 +69,7 @@ zinit light zdharma-continuum/fast-syntax-highlighting
 zinit snippet OMZP::command-not-found
 zinit snippet OMZP::colored-man-pages
 zstyle :omz:plugins:ssh-agent quiet yes
-zstyle :omz:plugins:ssh-agent lazy yes
+zstyle :omz:plugins:ssh-agent lazy no
 zinit snippet OMZP::ssh-agent
 # vi-mode: explicit cursor shape (lighter than OMZ vi-mode snippet)
 function zle-keymap-select() {
