@@ -82,8 +82,10 @@ All configs are **symlinked** — edit files in the repo, changes apply immediat
 | Theme | Catppuccin Mocha |
 | Opacity | 0.92 with blur |
 | Cursor | Block, no blink, inverted fg/bg |
-| Splits | `Super+D` / `Super+Shift+D` |
-| Split nav | `Super+Ctrl+H/J/K/L` |
+| Font rendering | Thickened, no-hinting, 1.1 min contrast |
+| Splits | `Alt+D` / `Alt+Shift+D`, zoom with `Alt+Shift+Enter` |
+| Split nav | `Alt+H/J/K/L` |
+| Window | State persistence, tabs at bottom |
 
 ## Keybindings
 
@@ -99,6 +101,27 @@ All configs are **symlinked** — edit files in the repo, changes apply immediat
 | `Ctrl+Z` | Toggle foreground/background process |
 | `Ctrl+←/→` | Jump word left/right |
 | `~~` | Trigger fzf completion |
+
+### Ghostty
+
+| Key | Action |
+|-----|--------|
+| `Alt+D` | Split right |
+| `Alt+Shift+D` | Split down |
+| `Alt+W` | Close split |
+| `Alt+H/J/K/L` | Navigate splits |
+| `Alt+Shift+Enter` | Zoom/unzoom split |
+| `Alt+Shift+E` | Equalize all splits |
+| `Alt+Ctrl+Arrows` | Resize splits (±10) |
+| `Alt+T` | New tab |
+| `Alt+1–5` | Go to tab |
+| `Alt+Up/Down` | Jump to prev/next prompt |
+| `Alt+=/−/0` | Font size +/−/reset |
+| `Alt+Enter` | Toggle fullscreen |
+| `Alt+F` | Copy URL to clipboard |
+| `Alt+Shift+S` | Dump scrollback to file |
+| `Alt+Shift+I` | Terminal inspector |
+| `Alt+Ctrl+R` | Reload config |
 
 ### Tmux
 
