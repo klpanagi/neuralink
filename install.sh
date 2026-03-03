@@ -395,7 +395,8 @@ setup_symlinks() {
     create_symlink "$REPO_DIR/tmux.conf"      "$HOME/.tmux.conf"                 "tmux.conf"
     create_symlink "$REPO_DIR/ghostty_config" "$HOME/.config/ghostty/config"     "ghostty_config"
     create_symlink "$REPO_DIR/init.lua"      "$HOME/.config/nvim/init.lua"      "init.lua"
-    create_symlink "$REPO_DIR/starship.toml" "$HOME/.config/starship.toml"      "starship.toml"
+    create_symlink "$REPO_DIR/starship.toml"      "$HOME/.config/starship.toml"       "starship.toml"
+    create_symlink "$REPO_DIR/atuin_config.toml"  "$HOME/.config/atuin/config.toml"  "atuin_config.toml"
 
     echo ""
     info "Existing config files were backed up to:"
@@ -453,7 +454,7 @@ show_summary() {
     echo -e "  ${BOLD}[3]${NC} Shell Enhancers   starship, zoxide, atuin, lazygit"
     echo -e "  ${BOLD}[4]${NC} Dev Tools         pyenv, fnm"
     echo -e "  ${BOLD}[5]${NC} Fonts             JetBrains Mono Nerd Font"
-    echo -e "  ${BOLD}[6]${NC} Symlink Configs   zshrc, tmux.conf, ghostty, aliases, functions"
+    echo -e "  ${BOLD}[6]${NC} Symlink Configs   zshrc, tmux.conf, ghostty, atuin, aliases, functions"
     echo ""
 }
 

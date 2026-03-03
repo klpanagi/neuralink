@@ -35,6 +35,7 @@ Existing configs are backed up to `~/.neuralink-backup/<timestamp>/` before syml
 ├── ghostty_config     → ~/.config/ghostty/config
 ├── init.lua           → ~/.config/nvim/init.lua
 ├── starship.toml      → ~/.config/starship.toml
+├── atuin_config.toml  → ~/.config/atuin/config.toml
 └── install.sh
 ```
 

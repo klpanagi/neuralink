@@ -1,0 +1,60 @@
+## Atuin — managed by neuralink
+## Full reference: https://docs.atuin.sh/configuration/config/
+
+# ── Search ────────────────────────────────────────────────────────────────────
+
+## fuzzy matching across full command text
+search_mode = "fuzzy"
+
+## search all hosts by default; cycle with Tab in the TUI
+filter_mode = "global"
+
+## same filter for up-arrow binding
+filter_mode_shell_up_key_binding = "global"
+
+# ── UI / Style ────────────────────────────────────────────────────────────────
+
+## "full" = fullscreen overlay (the popup feel)
+## "compact" = inline within terminal
+## "auto" = atuin decides (inconsistent across machines)
+style = "full"
+
+## 0 = always fullscreen; >0 = max lines when inline
+inline_height = 0
+
+## show a preview of the selected command below the list
+show_preview = true
+
+## show the help/version bar at the bottom
+show_help = true
+
+## show search/inspect tabs
+show_tabs = true
+
+## pressing Enter runs the command; Tab pastes it for editing
+enter_accept = true
+
+## Esc returns the original command (before search)
+exit_mode = "return-original"
+
+## auto-detect vim/emacs from current shell keymap
+keymap_mode = "auto"
+
+# ── History ───────────────────────────────────────────────────────────────────
+
+## filter out secrets (AWS keys, GitHub PATs, Slack tokens, etc.)
+secrets_filter = true
+
+# history_filter = []
+
+# ── Sync ──────────────────────────────────────────────────────────────────────
+
+[sync]
+records = true
+
+# ── Tmux Popup (requires tmux >= 3.2) ─────────────────────────────────────────
+
+[tmux]
+enabled = true
+width = "80%"
+height = "60%"
