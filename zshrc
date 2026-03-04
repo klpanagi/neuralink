@@ -7,7 +7,7 @@ export CC=/usr/bin/gcc
 export CXX=/usr/bin/g++
 export GOPATH=$HOME/go
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig
-export SSH_KEY_PATH="$HOME/.ssh/id_ed25519.pub"
+export SSH_KEY_PATH="$HOME/.ssh/id_rsa.pub"
 export GITHUB_ACCESS_TOKEN_FILE="${HOME}/.github-access.token"
 
 typeset -U PATH path
@@ -53,6 +53,7 @@ if [[ ! -d "$ZINIT_HOME" ]]; then
   git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 fi
 source "${ZINIT_HOME}/zinit.zsh"
+unalias zi 2>/dev/null
 
 zinit ice wait lucid blockf atpull'zinit creinstall -q .'
 zinit light zsh-users/zsh-completions
@@ -213,7 +214,15 @@ command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 [ -f "${HOME}/.gcp/env.bash" ] && source ~/.gcp/env.bash
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-command -v fd >/dev/null 2>&1 || echo "[WARNING]: fd missing! Install: pacman -S fd"
-command -v fzf >/dev/null 2>&1 || echo "[WARNING]: fzf missing! Install: pacman -S fzf"
-command -v eza >/dev/null 2>&1 || echo "[WARNING]: eza missing! Install: pacman -S eza"
-command -v starship >/dev/null 2>&1 || echo "[WARNING]: starship missing! Install: pacman -S starship"
+if command -v pacman &>/dev/null; then
+  _pkg="pacman -S"
+elif command -v apt &>/dev/null; then
+  _pkg="apt install"
+else
+  _pkg="your package manager to install"
+fi
+command -v fd >/dev/null 2>&1 || echo "[WARNING]: fd missing! Install: $_pkg fd"
+command -v fzf >/dev/null 2>&1 || echo "[WARNING]: fzf missing! Install: $_pkg fzf"
+command -v eza >/dev/null 2>&1 || echo "[WARNING]: eza missing! Install: $_pkg eza"
+command -v starship >/dev/null 2>&1 || echo "[WARNING]: starship missing! Install: $_pkg starship"
+unset _pkg
