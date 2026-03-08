@@ -127,6 +127,45 @@ install_if_missing() {
 
 # ── Component Installers ─────────────────────────────────────────────────────
 
+setup_zsh_autostart() {
+    local bashrc="$HOME/.bashrc"
+    local marker="# -- neuralink: auto-start zsh --"
+
+    if [[ "$SHELL" == *"zsh"* ]]; then
+        return
+    fi
+
+    if [[ -f "$bashrc" ]] && grep -qF "$marker" "$bashrc"; then
+        dim "zsh auto-start already in .bashrc — skipping"
+        return
+    fi
+
+    if ! ask "zsh is not your default shell. Add auto-start to .bashrc?" y; then
+        return
+    fi
+
+    backup_file "$bashrc"
+
+    local tmp
+    tmp=$(mktemp)
+    cat > "$tmp" << 'SNIPPET'
+# -- neuralink: auto-start zsh --
+if [ -x "$(command -v zsh)" ] && [ -z "$ZSH_VERSION" ] && [ -z "$INSIDE_EMACS" ] && [ "$TERM" != "dumb" ]; then
+  export SHELL="$(command -v zsh)"
+  exec "$SHELL" -l
+fi
+# -- end neuralink --
+
+SNIPPET
+
+    if [[ -f "$bashrc" ]]; then
+        cat "$bashrc" >> "$tmp"
+    fi
+    mv -f "$tmp" "$bashrc"
+    success "zsh auto-start added to .bashrc"
+    log "Prepended zsh auto-start to $bashrc"
+}
+
 install_core() {
     step "Core — zsh, tmux, git"
 
@@ -138,7 +177,14 @@ install_core() {
 
     if [[ "$SHELL" != *"zsh"* ]]; then
         if ask "Set zsh as your default shell?"; then
-            chsh -s "$(which zsh)" && success "Default shell set to zsh" || warn "Failed to change shell — run: chsh -s \$(which zsh)"
+            if chsh -s "$(which zsh)"; then
+                success "Default shell set to zsh"
+            else
+                warn "Failed to change shell via chsh"
+                setup_zsh_autostart
+            fi
+        else
+            setup_zsh_autostart
         fi
     else
         dim "zsh is already your default shell"

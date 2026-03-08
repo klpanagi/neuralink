@@ -1,2 +1,161 @@
 # -- Custom shell functions --
-# Add project-specific functions below
+
+# ── Theme Switcher ────────────────────────────────────────────────────────────
+# Applies theme across Ghostty, Tmux, and Starship in one command.
+#
+#   theme              interactive fzf picker
+#   theme <name>       apply theme by key (e.g. "dracula", "nord")
+#   theme list         list available themes (● = active)
+#   theme current      print active theme name
+
+theme() {
+  local -a keys=(
+    catppuccin-mocha dracula tokyo-night gruvbox-dark
+    nord one-dark solarized-dark rose-pine
+  )
+
+  local -A labels=(
+    [catppuccin-mocha]="Catppuccin Mocha"
+    [dracula]="Dracula"
+    [tokyo-night]="Tokyo Night"
+    [gruvbox-dark]="Gruvbox Dark"
+    [nord]="Nord"
+    [one-dark]="One Dark"
+    [solarized-dark]="Solarized Dark"
+    [rose-pine]="Rosé Pine"
+  )
+
+  # Ghostty theme names (verified via ghostty +list-themes)
+  local -A ghostty_names=(
+    [catppuccin-mocha]="Catppuccin Mocha"
+    [dracula]="Dracula"
+    [tokyo-night]="TokyoNight"
+    [gruvbox-dark]="Gruvbox Dark"
+    [nord]="Nord"
+    [one-dark]="Atom One Dark"
+    [solarized-dark]="Builtin Solarized Dark"
+    [rose-pine]="Rose Pine"
+  )
+
+  # Tmux color overrides: bg,fg,accent,dim (empty = catppuccin plugin defaults)
+  local -A tmux_colors=(
+    [catppuccin-mocha]=""
+    [dracula]="#282a36,#f8f8f2,#bd93f9,#44475a"
+    [tokyo-night]="#1a1b26,#c0caf5,#7aa2f7,#3b4261"
+    [gruvbox-dark]="#282828,#ebdbb2,#fabd2f,#504945"
+    [nord]="#2e3440,#eceff4,#88c0d0,#3b4252"
+    [one-dark]="#282c34,#abb2bf,#61afef,#3e4452"
+    [solarized-dark]="#002b36,#839496,#268bd2,#073642"
+    [rose-pine]="#191724,#e0def4,#c4a7e7,#26233a"
+  )
+
+  local state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/neuralink"
+  local state_file="$state_dir/theme"
+  local current=$(cat "$state_file" 2>/dev/null || echo "catppuccin-mocha")
+
+  case "${1:-}" in
+    list)
+      for k in "${keys[@]}"; do
+        if [[ "$k" == "$current" ]]; then
+          printf "  \e[1;32m●\e[0m %s\n" "${labels[$k]}"
+        else
+          printf "  ○ %s\n" "${labels[$k]}"
+        fi
+      done
+      return ;;
+    current)
+      echo "${labels[$current]:-$current}"
+      return ;;
+  esac
+
+  # Resolve selection — interactive or from argument
+  local selected="${1:-}"
+  if [[ -z "$selected" ]]; then
+    if ! command -v fzf >/dev/null 2>&1; then
+      echo "fzf required for interactive picker. Usage: theme <name>"
+      theme list
+      return 1
+    fi
+    selected=$(printf '%s\n' "${keys[@]}" | \
+      while IFS= read -r k; do echo "${labels[$k]}"; done | \
+      fzf --prompt=" Theme > " --height=12 --reverse --border --no-info \
+          --header="current: ${labels[$current]}")
+    [[ -z "$selected" ]] && return
+  fi
+
+  # Map display name or key → theme key
+  local key=""
+  for k in "${keys[@]}"; do
+    if [[ "${labels[$k]}" == "$selected" ]] || [[ "$k" == "$selected" ]]; then
+      key="$k"
+      break
+    fi
+  done
+
+  if [[ -z "$key" ]]; then
+    echo "unknown theme: $selected"
+    theme list
+    return 1
+  fi
+
+  # ── Ghostty ──
+  local gcfg="${HOME}/.config/ghostty/config"
+  if [[ -f "$gcfg" ]]; then
+    sed --follow-symlinks -i "s/^theme = .*/theme = ${ghostty_names[$key]}/" "$gcfg"
+  fi
+
+  # ── Starship ──
+  local scfg="${HOME}/.config/starship.toml"
+  if [[ -f "$scfg" ]]; then
+    sed --follow-symlinks -i "s/^palette = .*/palette = \"${key//-/_}\"/" "$scfg"
+  fi
+
+  # ── Tmux ──
+  local tmux_override="${HOME}/.tmux_theme.conf"
+  local colors="${tmux_colors[$key]}"
+  if [[ -z "$colors" ]]; then
+    # Catppuccin — clear overrides, let plugin handle everything
+    : > "$tmux_override"
+  else
+    local bg="${colors%%,*}"; colors="${colors#*,}"
+    local fg="${colors%%,*}"; colors="${colors#*,}"
+    local accent="${colors%%,*}"
+    local dim="${colors##*,}"
+    cat > "$tmux_override" << EOF
+# neuralink theme: ${labels[$key]} — auto-generated, do not edit
+set -g status-style "bg=${bg}"
+set -g pane-border-style "fg=${dim}"
+set -g pane-active-border-style "fg=${accent}"
+set -g mode-style "bg=${accent},fg=${bg}"
+set -g message-style "bg=${accent},fg=${bg}"
+set -g message-command-style "bg=${dim},fg=${fg}"
+EOF
+  fi
+  [[ -n "${TMUX:-}" ]] && tmux source-file ~/.tmux.conf 2>/dev/null
+
+  # ── Persist ──
+  mkdir -p "$state_dir"
+  echo "$key" > "$state_file"
+
+  echo "● ${labels[$key]}"
+}
+
+# Tab completion for theme command
+_theme_completion() {
+  local -a subcmds=(
+    'list:List available themes'
+    'current:Show active theme'
+  )
+  local -a themes=(
+    'catppuccin-mocha:Catppuccin Mocha'
+    'dracula:Dracula'
+    'tokyo-night:Tokyo Night'
+    'gruvbox-dark:Gruvbox Dark'
+    'nord:Nord'
+    'one-dark:One Dark'
+    'solarized-dark:Solarized Dark'
+    'rose-pine:Rosé Pine'
+  )
+  _describe 'command' subcmds -- themes
+}
+compdef _theme_completion theme

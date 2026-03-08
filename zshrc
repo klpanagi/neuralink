@@ -204,7 +204,7 @@ command -v fnm >/dev/null 2>&1 && eval "$(fnm env --use-on-cd --shell zsh)"
 
 command -v atuin >/dev/null 2>&1 && eval "$(atuin init zsh)"
 
-command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh --cmd cd)"
 
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 
@@ -214,13 +214,13 @@ command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 [ -f "${HOME}/.gcp/env.bash" ] && source ~/.gcp/env.bash
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-if command -v pacman &>/dev/null; then
-  _pkg="pacman -S"
-elif command -v apt &>/dev/null; then
-  _pkg="apt install"
-else
-  _pkg="your package manager to install"
-fi
+_distro_id=$(. /etc/os-release 2>/dev/null && echo "${ID:-}")
+case "$_distro_id" in
+  arch|manjaro|endeavouros|garuda|cachyos) _pkg="pacman -S" ;;
+  ubuntu|debian|pop|linuxmint|elementary|zorin) _pkg="apt install" ;;
+  *) _pkg="your package manager to install" ;;
+esac
+unset _distro_id
 command -v fd >/dev/null 2>&1 || echo "[WARNING]: fd missing! Install: $_pkg fd"
 command -v fzf >/dev/null 2>&1 || echo "[WARNING]: fzf missing! Install: $_pkg fzf"
 command -v eza >/dev/null 2>&1 || echo "[WARNING]: eza missing! Install: $_pkg eza"
