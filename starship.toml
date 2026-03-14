@@ -3,6 +3,8 @@
 
 palette = "catppuccin_mocha"
 
+command_timeout = 2000
+
 format = """
 $directory\
 $git_branch\
@@ -54,6 +56,10 @@ format = "[$duration]($style) "
 style = "bold blue"
 format = '[${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
 symbol = " "
+python_binary = ["python3", "python"]
+detect_extensions = ["py"]
+detect_files = ["requirements.txt", "pyproject.toml", "setup.py", "setup.cfg", "Pipfile", ".python-version"]
+detect_folders = [".venv", "venv", "__pypackages__"]
 
 [nodejs]
 style = "bold green"
