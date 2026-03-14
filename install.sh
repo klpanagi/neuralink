@@ -326,8 +326,22 @@ install_shell_enhancements() {
 
         if ! install_if_missing atuin; then
             info "Installing atuin..."
-            curl -fsSL https://setup.atuin.sh | sh >> "$LOG_FILE" 2>&1 \
-                && success "atuin installed" || error "Failed to install atuin"
+            local atuin_version atuin_tmp atuin_arch
+            atuin_version=$(curl -fsSL "https://api.github.com/repos/atuinsh/atuin/releases/latest" \
+                | grep -Po '"tag_name": "v\K[^"]*')
+            atuin_arch=$(uname -m)
+            if [[ -n "$atuin_version" ]]; then
+                atuin_tmp=$(mktemp -d)
+                curl -fsSLo "$atuin_tmp/atuin.tar.gz" \
+                    "https://github.com/atuinsh/atuin/releases/download/v${atuin_version}/atuin-${atuin_arch}-unknown-linux-musl.tar.gz" \
+                    >> "$LOG_FILE" 2>&1
+                tar xzf "$atuin_tmp/atuin.tar.gz" -C "$atuin_tmp" --strip-components=1 >> "$LOG_FILE" 2>&1
+                install "$atuin_tmp/atuin" "$HOME/.local/bin/atuin"
+                rm -rf "$atuin_tmp"
+                success "atuin ${atuin_version} installed to ~/.local/bin"
+            else
+                error "Failed to fetch atuin version — install manually: https://atuin.sh"
+            fi
         fi
 
         if ! install_if_missing lazygit; then
