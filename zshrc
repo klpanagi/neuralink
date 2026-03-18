@@ -204,7 +204,7 @@ command -v fnm >/dev/null 2>&1 && eval "$(fnm env --use-on-cd --shell zsh)"
 
 command -v atuin >/dev/null 2>&1 && eval "$(atuin init zsh)"
 
-command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh --cmd cd)"
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
 
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 
