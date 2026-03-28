@@ -37,7 +37,7 @@ vim.opt.autoread = true
 -- [[ Bootstrap Lazy.nvim ]]
 -- ============================================================================
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.uv.fs_stat(lazypath) then
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
   vim.fn.system({
     "git", "clone", "--filter=blob:none",
     "https://github.com/folke/lazy.nvim.git",
@@ -95,41 +95,18 @@ require("lazy").setup({
   },
 
   -- --------------------------------------------------------------------------
-  -- 1. THE FRONTEND: OpenCode.nvim (PRESERVED — do not modify)
+  -- Blink.cmp — Completion engine
   -- --------------------------------------------------------------------------
-	{
-	  "sudo-tee/opencode.nvim",
-	  version = "*",
-	  dependencies = { "nvim-lua/plenary.nvim", "sindrets/diffview.nvim" },
-	  opts = {
-	    keymap_prefix = "<leader>o",
-	    -- We set this to 'vim_complete' so the plugin doesn't try to auto-inject its broken setup
-	    preferred_completion = "vim_complete",
-	  },
-	},
-
-  -- --------------------------------------------------------------------------
-  -- 2. THE ENGINE: Blink.cmp (PRESERVED — do not modify)
-  -- --------------------------------------------------------------------------
-	{
-	  'saghen/blink.cmp',
-	  version = '*',
-	  opts = {
-	    keymap = { preset = 'super-tab' },
-	    sources = {
-	      -- REMOVED 'agentic' to fix your module error.
-	      -- Added 'opencode' which is the stable completion for your agent.
-	      default = { 'lsp', 'path', 'snippets', 'buffer', 'opencode' },
-	      providers = {
-		opencode = {
-		  name = 'OpenCode',
-		  module = 'opencode.ui.completion.engines.blink_cmp',
-		  score_offset = 100,
-		},
-	      },
-	    },
-	  },
-	},
+  {
+    'saghen/blink.cmp',
+    version = '*',
+    opts = {
+      keymap = { preset = 'super-tab' },
+      sources = {
+        default = { 'lsp', 'path', 'snippets', 'buffer' },
+      },
+    },
+  },
 
   -- --------------------------------------------------------------------------
   -- LSP: nvim-lspconfig + Mason
@@ -213,7 +190,6 @@ require("lazy").setup({
         { "<leader>b", group = "buffer" },
         { "<leader>r", group = "refactor" },
         { "<leader>c", group = "code" },
-        { "<leader>o", group = "opencode" },
       },
     },
   },
@@ -363,8 +339,9 @@ map("n", "<leader>gb", function() Snacks.git.blame_line() end, { desc = "Git bla
 -- tools, then triggers checktime to reload modified buffers.
 
 local function setup_fs_watcher()
-  local watcher = vim.uv.new_fs_event()
-  local timer = vim.uv.new_timer()
+  local uv = vim.uv or vim.loop
+  local watcher = uv.new_fs_event()
+  local timer = uv.new_timer()
   local path = vim.fn.getcwd()
   local debounce_ms = 200
 
@@ -416,21 +393,6 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHo
     if vim.fn.mode() ~= "c" then
       vim.cmd("checktime")
     end
-  end,
-})
-
--- [[ Agent Notification Hook ]] (PRESERVED — do not modify)
-vim.api.nvim_create_autocmd("User", {
-  pattern = "OpencodeTaskDone", -- Hook provided by opencode.nvim
-  callback = function()
-    require("snacks").notifier.show({
-      msg = "OpenCode: Task Completed!",
-      level = "info",
-      title = "Agent Status",
-      icon = "🤖",
-    })
-    -- Force a final refresh just in case
-    vim.cmd('checktime')
   end,
 })
 
