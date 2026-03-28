@@ -1,7 +1,7 @@
 -- ============================================================================
--- [[ Neuralink IDE — 2026 Agentic Neovim Config ]]
+-- [[ Neuralink IDE — Neovim Config ]]
 -- ============================================================================
--- Catppuccin Mocha · Snacks · LSP · Treesitter · Agent Integration
+-- Catppuccin Mocha · Snacks · LSP · Treesitter
 -- Leader: Space | Terminal: Ghostty | Multiplexer: Tmux
 -- ============================================================================
 
@@ -29,6 +29,13 @@ vim.opt.timeoutlen = 300
 vim.opt.completeopt = "menu,menuone,noselect"
 vim.opt.mouse = "a"
 vim.opt.clipboard = "unnamedplus"
+if vim.env.SSH_TTY then
+  vim.g.clipboard = {
+    name  = "OSC 52",
+    copy  = { ["+"] = require("vim.ui.clipboard.osc52").copy("+"),  ["*"] = require("vim.ui.clipboard.osc52").copy("*") },
+    paste = { ["+"] = require("vim.ui.clipboard.osc52").paste("+"), ["*"] = require("vim.ui.clipboard.osc52").paste("*") },
+  }
+end
 vim.opt.breakindent = true
 vim.opt.showmode = false
 vim.opt.autoread = true
@@ -131,11 +138,9 @@ require("lazy").setup({
     config = function()
       require("nvim-treesitter.configs").setup({
         ensure_installed = {
-          "lua", "python", "javascript", "typescript", "tsx",
-          "go", "rust", "bash", "json", "yaml", "toml",
-          "html", "css", "markdown", "markdown_inline",
-          "vim", "vimdoc", "regex", "c", "cpp",
+          "lua", "bash", "markdown", "markdown_inline", "vim", "vimdoc",
         },
+        auto_install = false,
         highlight = { enable = true },
         indent = { enable = true },
         incremental_selection = {
@@ -233,10 +238,11 @@ require("lazy").setup({
         go = { "gofmt" },
         rust = { "rustfmt" },
       },
-      format_on_save = {
-        timeout_ms = 1000,
-        lsp_format = "fallback",
-      },
+      format_on_save = function(_)
+        if vim.g.disable_autoformat then return end
+        return { timeout_ms = 1000, lsp_format = "fallback" }
+      end,
+      notify_on_error = false,
     },
   },
 
@@ -273,16 +279,7 @@ end
 
 require("mason").setup()
 require("mason-lspconfig").setup({
-  ensure_installed = {
-    "lua_ls",
-    "pyright",
-    "ts_ls",
-    "gopls",
-    "rust_analyzer",
-    "bashls",
-    "jsonls",
-    "yamlls",
-  },
+  ensure_installed = {},
   handlers = {
     function(server_name)
       require("lspconfig")[server_name].setup({
@@ -333,62 +330,11 @@ map("n", "<leader>gg", function() Snacks.lazygit() end, { desc = "Lazygit" })
 map("n", "<leader>gb", function() Snacks.git.blame_line() end, { desc = "Git blame line" })
 
 -- ============================================================================
--- [[ Live Refresh — Debounced FS Watcher (LibUV) ]]
--- ============================================================================
--- Watches the working directory for file changes made by agents or external
--- tools, then triggers checktime to reload modified buffers.
-
-local function setup_fs_watcher()
-  local uv = vim.uv or vim.loop
-  local watcher = uv.new_fs_event()
-  local timer = uv.new_timer()
-  local path = vim.fn.getcwd()
-  local debounce_ms = 200
-
-  -- Patterns to ignore
-  local ignore_patterns = {
-    "%.git/",
-    "%.swp$",
-    "~$",
-    "%.o$",
-    "node_modules/",
-    "__pycache__/",
-    "%.pyc$",
-  }
-
-  local function should_ignore(fname)
-    if not fname then return true end
-    for _, pattern in ipairs(ignore_patterns) do
-      if fname:match(pattern) then return true end
-    end
-    return false
-  end
-
-  local scheduled_check = vim.schedule_wrap(function()
-    if vim.fn.mode() ~= "c" then
-      vim.cmd("checktime")
-    end
-  end)
-
-  watcher:start(path, { recursive = true }, function(err, fname, _)
-    if err then return end
-    if should_ignore(fname) then return end
-
-    -- Debounce: restart timer on each event, only fire after quiet period
-    timer:stop()
-    timer:start(debounce_ms, 0, scheduled_check)
-  end)
-end
-
-setup_fs_watcher()
-
--- ============================================================================
 -- [[ Autocommands ]]
 -- ============================================================================
 
--- Fallback: Standard autoread on focus/cursor events
 vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" }, {
-  group = vim.api.nvim_create_augroup("AgenticRefresh", { clear = true }),
+  group = vim.api.nvim_create_augroup("AutoRead", { clear = true }),
   callback = function()
     if vim.fn.mode() ~= "c" then
       vim.cmd("checktime")
