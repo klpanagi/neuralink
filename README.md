@@ -8,6 +8,14 @@ Combining the speed of **Zsh**, the multitasking of **Tmux**, the power of **Neo
 
 Catppuccin Mocha · Vi-mode everywhere · Symlinked configs · One-command setup
 
+<br/>
+
+[![Stars](https://img.shields.io/github/stars/klpanagi/neuralink?style=flat-square&color=cba6f7&labelColor=1e1e2e)](https://github.com/klpanagi/neuralink/stargazers)
+[![Forks](https://img.shields.io/github/forks/klpanagi/neuralink?style=flat-square&color=89b4fa&labelColor=1e1e2e)](https://github.com/klpanagi/neuralink/forks)
+[![License](https://img.shields.io/github/license/klpanagi/neuralink?style=flat-square&color=a6e3a1&labelColor=1e1e2e)](LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/klpanagi/neuralink?style=flat-square&color=f38ba8&labelColor=1e1e2e)](https://github.com/klpanagi/neuralink/commits/main)
+[![Platform](https://img.shields.io/badge/platform-Arch%20%7C%20Debian%2FUbuntu-89dceb?style=flat-square&labelColor=1e1e2e)](https://github.com/klpanagi/neuralink#install-script)
+
 </div>
 
 ---
@@ -15,14 +23,31 @@ Catppuccin Mocha · Vi-mode everywhere · Symlinked configs · One-command setup
 ## Quick Start
 
 ```bash
-git clone git@github.com:klpanagi/neuralink.git ~/.neuralink
+git clone https://github.com/klpanagi/neuralink.git ~/.neuralink
 cd ~/.neuralink
 ./install.sh
 ```
 
-The installer is interactive — select what you want, skip what you don't.
+> SSH user? `git clone git@github.com:klpanagi/neuralink.git ~/.neuralink`
 
+The installer is interactive — select what you want, skip what you don't.  
 Existing configs are backed up to `~/.neuralink-backup/<timestamp>/` before symlinking.
+
+---
+
+## Why neuralink?
+
+Most dotfiles repos are a personal dump — hard to adopt, risky to install, and impossible to maintain. This one is built to be **actually usable by someone other than its author**.
+
+| | neuralink |
+|---|---|
+| **Install** | One script, interactive menu, skip what you don't need |
+| **Safety** | Auto-backup of existing configs before touching anything |
+| **Live edits** | Symlinked — edit files in the repo, changes apply instantly |
+| **Consistency** | Catppuccin Mocha + vi-mode wired through every tool |
+| **Modern stack** | Ghostty · Neovim + lazy.nvim · Zinit turbo · blink.cmp |
+| **AI-native** | opencode.nvim wired into Neovim out of the box |
+| **Platforms** | Arch/Manjaro and Debian/Ubuntu handled automatically |
 
 ## What's Inside
 
@@ -392,6 +417,11 @@ Each component is optional. Already-installed tools are skipped. Platform-specif
 2. Open tmux and press `` `I `` to install tmux plugins
 3. Open neovim — lazy.nvim auto-installs plugins, Mason auto-installs LSP servers
 4. Zinit plugins auto-install on first zsh launch
+
+## Contributing
+
+Found a bug, have an improvement, or want to add support for a new distro? PRs are welcome.  
+For questions or config discussions, use [GitHub Discussions](https://github.com/klpanagi/neuralink/discussions).
 
 ## License
 
