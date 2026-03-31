@@ -9,6 +9,8 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="$HOME/.neuralink-backup/$(date +%Y%m%d_%H%M%S)"
 LOG_FILE="/tmp/neuralink-install-$(date +%Y%m%d_%H%M%S).log"
 
+NVIM_MIN_VERSION="0.10"
+
 # ── Colors ────────────────────────────────────────────────────────────────────
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -125,7 +127,65 @@ install_if_missing() {
     return 1
 }
 
+nvim_version() {
+    nvim --version 2>/dev/null | head -1 | grep -Po 'NVIM v\K[\d.]+'
+}
+
+nvim_meets_min() {
+    local ver maj min req_maj req_min
+    ver=$(nvim_version)
+    [[ -z "$ver" ]] && return 1
+    maj=$(echo "$ver" | cut -d. -f1)
+    min=$(echo "$ver" | cut -d. -f2)
+    req_maj=$(echo "$NVIM_MIN_VERSION" | cut -d. -f1)
+    req_min=$(echo "$NVIM_MIN_VERSION" | cut -d. -f2)
+    [[ "$maj" -gt "$req_maj" ]] && return 0
+    [[ "$maj" -eq "$req_maj" && "$min" -ge "$req_min" ]] && return 0
+    return 1
+}
+
 # ── Component Installers ─────────────────────────────────────────────────────
+
+install_neovim_debian() {
+    if cmd_exists nvim && nvim_meets_min; then
+        dim "neovim $(nvim_version) already installed — skipping"
+        return 0
+    fi
+
+    if cmd_exists nvim; then
+        warn "neovim $(nvim_version) is below required ${NVIM_MIN_VERSION} — installing latest from GitHub"
+    else
+        info "Installing neovim from GitHub releases (apt version is too old)..."
+    fi
+
+    local nvim_tag nvim_tmp
+    nvim_tag=$(curl -fsSL "https://api.github.com/repos/neovim/neovim/releases/latest" \
+        | grep -Po '"tag_name": "\K[^"]*')
+
+    if [[ -z "$nvim_tag" ]]; then
+        error "Failed to fetch neovim release info — install manually: https://github.com/neovim/neovim/releases"
+        return 1
+    fi
+
+    local arch
+    arch=$(uname -m)
+    local asset="nvim-linux-x86_64.tar.gz"
+    [[ "$arch" == "aarch64" ]] && asset="nvim-linux-arm64.tar.gz"
+
+    nvim_tmp=$(mktemp -d)
+    curl -fsSLo "$nvim_tmp/nvim.tar.gz" \
+        "https://github.com/neovim/neovim/releases/download/${nvim_tag}/${asset}" \
+        >> "$LOG_FILE" 2>&1 \
+        || { error "Failed to download neovim ${nvim_tag}"; rm -rf "$nvim_tmp"; return 1; }
+
+    mkdir -p "$HOME/.local"
+    tar xzf "$nvim_tmp/nvim.tar.gz" -C "$HOME/.local" --strip-components=1 >> "$LOG_FILE" 2>&1
+    rm -rf "$nvim_tmp"
+
+    mkdir -p "$HOME/.local/bin"
+    success "neovim ${nvim_tag} installed to ~/.local"
+    dim "Make sure ~/.local/bin is in your PATH"
+}
 
 setup_zsh_autostart() {
     local bashrc="$HOME/.bashrc"
@@ -209,6 +269,9 @@ install_cli_tools() {
             info "Installing ${tools[$cmd]}..."
             pkg_install "${tools[$cmd]}" && success "${tools[$cmd]} installed" || error "Failed to install ${tools[$cmd]}"
         done
+        if cmd_exists nvim && ! nvim_meets_min; then
+            warn "neovim $(nvim_version) is below required ${NVIM_MIN_VERSION} — run: sudo pacman -S neovim"
+        fi
 
     elif [[ "$PLATFORM" == "debian" ]]; then
         if ! install_if_missing fzf; then
@@ -272,10 +335,7 @@ install_cli_tools() {
             pkg_install btop && success "btop installed" || error "Failed to install btop"
         fi
 
-        if ! install_if_missing nvim neovim; then
-            info "Installing neovim..."
-            pkg_install neovim && success "neovim installed" || error "Failed to install neovim"
-        fi
+        install_neovim_debian
     fi
 }
 
