@@ -76,7 +76,7 @@ require("lazy").setup({
         mason = true,
         treesitter = true,
         which_key = true,
-        snacks = true,
+        telescope = true,
       },
     },
     config = function(_, opts)
@@ -86,22 +86,44 @@ require("lazy").setup({
   },
 
   -- --------------------------------------------------------------------------
-  -- Snacks.nvim — UI toolkit
+  -- Telescope — Fuzzy finder
   -- --------------------------------------------------------------------------
   {
-    "folke/snacks.nvim",
-    priority = 1000,
-    lazy = false,
-    opts = {
-      dashboard = { enabled = true },
-      picker = { enabled = true },
-      notifier = { enabled = true },
-      indent = { enabled = true },
-      lazygit = { enabled = true },
-      terminal = { enabled = true },
-      statuscolumn = { enabled = true },
-      words = { enabled = true },
+    "nvim-telescope/telescope.nvim",
+    cmd = "Telescope",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     },
+    config = function()
+      local telescope = require("telescope")
+      telescope.setup({
+        defaults = {
+          sorting_strategy = "ascending",
+          layout_config = { prompt_position = "top" },
+        },
+      })
+      pcall(telescope.load_extension, "fzf")
+    end,
+  },
+
+  -- --------------------------------------------------------------------------
+  -- LazyGit — Git TUI
+  -- --------------------------------------------------------------------------
+  {
+    "kdheepak/lazygit.nvim",
+    cmd = "LazyGit",
+    dependencies = { "nvim-lua/plenary.nvim" },
+  },
+
+  -- --------------------------------------------------------------------------
+  -- Indent guides
+  -- --------------------------------------------------------------------------
+  {
+    "lukas-reineke/indent-blankline.nvim",
+    event = { "BufReadPost", "BufNewFile" },
+    main = "ibl",
+    opts = {},
   },
 
   -- --------------------------------------------------------------------------
@@ -320,17 +342,17 @@ map("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
 map("n", "<leader>e", vim.diagnostic.open_float, { desc = "Diagnostic float" })
 map("n", "<leader>q", "<cmd>Trouble toggle diagnostics<cr>", { desc = "Trouble diagnostics" })
 
--- Picker (Snacks)
-map("n", "<leader>ff", function() Snacks.picker.files() end, { desc = "Find files" })
-map("n", "<leader>fg", function() Snacks.picker.grep() end, { desc = "Live grep" })
-map("n", "<leader>fb", function() Snacks.picker.buffers() end, { desc = "Buffers" })
-map("n", "<leader>fh", function() Snacks.picker.help() end, { desc = "Help tags" })
-map("n", "<leader>fr", function() Snacks.picker.recent() end, { desc = "Recent files" })
-map("n", "<leader>fs", function() Snacks.picker.lsp_symbols() end, { desc = "LSP symbols" })
+-- Picker (Telescope)
+map("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Find files" })
+map("n", "<leader>fg", "<cmd>Telescope live_grep<cr>", { desc = "Live grep" })
+map("n", "<leader>fb", "<cmd>Telescope buffers<cr>", { desc = "Buffers" })
+map("n", "<leader>fh", "<cmd>Telescope help_tags<cr>", { desc = "Help tags" })
+map("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Recent files" })
+map("n", "<leader>fs", "<cmd>Telescope lsp_document_symbols<cr>", { desc = "LSP symbols" })
 
 -- Git
-map("n", "<leader>gg", function() Snacks.lazygit() end, { desc = "Lazygit" })
-map("n", "<leader>gb", function() Snacks.git.blame_line() end, { desc = "Git blame line" })
+map("n", "<leader>gg", "<cmd>LazyGit<cr>", { desc = "Lazygit" })
+map("n", "<leader>gb", function() require("gitsigns").blame_line() end, { desc = "Git blame line" })
 
 -- ============================================================================
 -- [[ Autocommands ]]
