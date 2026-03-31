@@ -30,11 +30,14 @@ vim.opt.completeopt = "menu,menuone,noselect"
 vim.opt.mouse = "a"
 vim.opt.clipboard = "unnamedplus"
 if vim.env.SSH_TTY then
-  vim.g.clipboard = {
-    name  = "OSC 52",
-    copy  = { ["+"] = require("vim.ui.clipboard.osc52").copy("+"),  ["*"] = require("vim.ui.clipboard.osc52").copy("*") },
-    paste = { ["+"] = require("vim.ui.clipboard.osc52").paste("+"), ["*"] = require("vim.ui.clipboard.osc52").paste("*") },
-  }
+  local ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
+  if ok then
+    vim.g.clipboard = {
+      name  = "OSC 52",
+      copy  = { ["+"] = osc52.copy("+"),  ["*"] = osc52.copy("*") },
+      paste = { ["+"] = osc52.paste("+"), ["*"] = osc52.paste("*") },
+    }
+  end
 end
 vim.opt.breakindent = true
 vim.opt.showmode = false
