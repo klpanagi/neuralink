@@ -14,7 +14,7 @@ Catppuccin Mocha · Vi-mode everywhere · Symlinked configs · One-command setup
 [![Forks](https://img.shields.io/github/forks/klpanagi/neuralink?style=flat-square&color=89b4fa&labelColor=1e1e2e)](https://github.com/klpanagi/neuralink/forks)
 [![License](https://img.shields.io/github/license/klpanagi/neuralink?style=flat-square&color=a6e3a1&labelColor=1e1e2e)](LICENSE)
 [![Last Commit](https://img.shields.io/github/last-commit/klpanagi/neuralink?style=flat-square&color=f38ba8&labelColor=1e1e2e)](https://github.com/klpanagi/neuralink/commits/main)
-[![Platform](https://img.shields.io/badge/platform-Arch%20%7C%20Debian%2FUbuntu-89dceb?style=flat-square&labelColor=1e1e2e)](https://github.com/klpanagi/neuralink#install-script)
+[![Platform](https://img.shields.io/badge/platform-Arch%20%7C%20Debian%2FUbuntu%20%7C%20macOS-89dceb?style=flat-square&labelColor=1e1e2e)](https://github.com/klpanagi/neuralink#install-script)
 
 </div>
 
@@ -47,7 +47,7 @@ Most dotfiles repos are a personal dump — hard to adopt, risky to install, and
 | **Consistency** | Catppuccin Mocha + vi-mode wired through every tool |
 | **Modern stack** | Ghostty · Neovim + lazy.nvim · Zinit turbo · blink.cmp |
 | **AI-native** | opencode.nvim wired into Neovim out of the box |
-| **Platforms** | Arch/Manjaro and Debian/Ubuntu handled automatically |
+| **Platforms** | Arch/Manjaro, Debian/Ubuntu and macOS handled automatically |
 
 ## What's Inside
 
@@ -396,7 +396,7 @@ Single-file config (`init.lua`) with [lazy.nvim](https://github.com/folke/lazy.n
 
 ## Install Script
 
-The interactive installer supports **Arch/Manjaro** and **Debian/Ubuntu**.
+The interactive installer supports **Arch/Manjaro**, **Debian/Ubuntu**, and **macOS** (via Homebrew).
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
@@ -409,7 +409,9 @@ The interactive installer supports **Arch/Manjaro** and **Debian/Ubuntu**.
 ╚══════════════════════════════════════════════════════════════════════╝
 ```
 
-Each component is optional. Already-installed tools are skipped. Platform-specific packaging quirks (like `fd-find` → `fd` on Debian) are handled automatically.
+Each component is optional. Already-installed tools are skipped. Platform-specific packaging quirks (like `fd-find` → `fd` on Debian, or Homebrew-first on macOS) are handled automatically.
+
+> **macOS note:** Homebrew is required. If it's not installed the script offers to install it for you.
 
 ## Post-Install
 

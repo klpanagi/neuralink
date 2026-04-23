@@ -1,6 +1,11 @@
 alias get_esp32="export PATH=$PATH:$HOME/development/esp32/xtensa-esp32-elf/bin && export IDF_PATH=$HOME/development/esp32/esp-idf"
 
-if [[ $(uname -r) == *ARCH* ]] || [[ $(uname -r) == *MANJARO* ]]; then
+if [[ "$(uname)" == "Darwin" ]]; then
+    alias install="brew install"
+    alias update="brew update"
+    alias upgrade="brew upgrade"
+    alias remove="brew uninstall"
+elif [[ $(uname -r) == *ARCH* ]] || [[ $(uname -r) == *MANJARO* ]]; then
     alias paci="sudo pacman -S"
     alias pacupgrade="sudo pacman -Syu"
     alias pacremove="sudo pacman -R"
@@ -61,8 +66,13 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 
 alias myip="dig +short myip.opendns.com @resolver1.opendns.com"
-alias tcp="ss -antp"
-alias udp="ss -anup"
+if [[ "$(uname)" == "Darwin" ]]; then
+    alias tcp="netstat -anp tcp"
+    alias udp="netstat -anp udp"
+else
+    alias tcp="ss -antp"
+    alias udp="ss -anup"
+fi
 alias findps="pgrep -af"
 
 alias tmux="tmux -2"

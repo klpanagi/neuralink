@@ -6,7 +6,7 @@ export TERMINAL="ghostty"
 export CC=/usr/bin/gcc
 export CXX=/usr/bin/g++
 export GOPATH=$HOME/go
-export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig
+[[ "$(uname)" != "Darwin" ]] && export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig
 export SSH_KEY_PATH="$HOME/.ssh/id_rsa.pub"
 export GITHUB_ACCESS_TOKEN_FILE="${HOME}/.github-access.token"
 
@@ -18,8 +18,10 @@ path=(
   $path
 )
 
-typeset -U LD_LIBRARY_PATH
-export LD_LIBRARY_PATH="${HOME}/.local/lib:${LD_LIBRARY_PATH}"
+if [[ "$(uname)" != "Darwin" ]]; then
+  typeset -U LD_LIBRARY_PATH
+  export LD_LIBRARY_PATH="${HOME}/.local/lib:${LD_LIBRARY_PATH}"
+fi
 
 setopt prompt_subst
 setopt correct
@@ -214,13 +216,17 @@ command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 [ -f "${HOME}/.gcp/env.bash" ] && source ~/.gcp/env.bash
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-_distro_id=$(. /etc/os-release 2>/dev/null && echo "${ID:-}")
-case "$_distro_id" in
-  arch|manjaro|endeavouros|garuda|cachyos) _pkg="pacman -S" ;;
-  ubuntu|debian|pop|linuxmint|elementary|zorin) _pkg="apt install" ;;
-  *) _pkg="your package manager to install" ;;
-esac
-unset _distro_id
+if [[ "$(uname)" == "Darwin" ]]; then
+  _pkg="brew install"
+else
+  _distro_id=$(. /etc/os-release 2>/dev/null && echo "${ID:-}")
+  case "$_distro_id" in
+    arch|manjaro|endeavouros|garuda|cachyos) _pkg="pacman -S" ;;
+    ubuntu|debian|pop|linuxmint|elementary|zorin) _pkg="apt install" ;;
+    *) _pkg="your package manager to install" ;;
+  esac
+  unset _distro_id
+fi
 command -v fd >/dev/null 2>&1 || echo "[WARNING]: fd missing! Install: $_pkg fd"
 command -v fzf >/dev/null 2>&1 || echo "[WARNING]: fzf missing! Install: $_pkg fzf"
 command -v eza >/dev/null 2>&1 || echo "[WARNING]: eza missing! Install: $_pkg eza"

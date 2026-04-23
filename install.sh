@@ -47,6 +47,12 @@ cmd_exists() { command -v "$1" &>/dev/null; }
 
 # ── Platform Detection ────────────────────────────────────────────────────────
 detect_platform() {
+    if [[ "$(uname)" == "Darwin" ]]; then
+        PLATFORM="macos"
+        PKG_MGR="brew"
+        return
+    fi
+
     if [[ -f /etc/os-release ]]; then
         # shellcheck disable=SC1091
         source /etc/os-release
@@ -66,7 +72,7 @@ detect_platform() {
                     *debian*|*ubuntu*) PLATFORM="debian"; PKG_MGR="apt" ;;
                     *)
                         error "Unsupported distro: $ID"
-                        error "This installer supports Arch-based and Debian-based distros."
+                        error "This installer supports Arch-based, Debian-based distros and macOS."
                         exit 1
                         ;;
                 esac
@@ -78,6 +84,34 @@ detect_platform() {
     fi
 }
 
+# ── Homebrew Guard (macOS only) ───────────────────────────────────────────────
+check_homebrew() {
+    if cmd_exists brew; then
+        dim "Homebrew found: $(brew --version | head -1)"
+        return
+    fi
+    warn "Homebrew not found — it is required to install packages on macOS."
+    echo ""
+    echo -e "  Install it with:"
+    echo -e "  ${CYAN}/bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"${NC}"
+    echo ""
+    if ask "Install Homebrew now?" y; then
+        info "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
+            >> "$LOG_FILE" 2>&1 && success "Homebrew installed" || {
+            error "Homebrew installation failed. Install manually and re-run."
+            exit 1
+        }
+        # Apple Silicon: add brew to PATH for the current session
+        if [[ -x /opt/homebrew/bin/brew ]]; then
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        fi
+    else
+        error "Cannot continue without Homebrew on macOS."
+        exit 1
+    fi
+}
+
 # ── Package Installers ────────────────────────────────────────────────────────
 pkg_install() {
     local name="$1"
@@ -85,6 +119,7 @@ pkg_install() {
     case "$PKG_MGR" in
         pacman) sudo pacman -S --noconfirm --needed "$name" >> "$LOG_FILE" 2>&1 ;;
         apt)    sudo apt-get install -y "$name" >> "$LOG_FILE" 2>&1 ;;
+        brew)   brew install "$name" >> "$LOG_FILE" 2>&1 ;;
     esac
 }
 
@@ -188,6 +223,8 @@ install_neovim_debian() {
 }
 
 setup_zsh_autostart() {
+    [[ "$PLATFORM" == "macos" ]] && return
+
     local bashrc="$HOME/.bashrc"
     local marker="# -- neuralink: auto-start zsh --"
 
@@ -229,6 +266,10 @@ SNIPPET
 install_core() {
     step "Core — zsh, tmux, git"
 
+    if [[ "$PLATFORM" == "macos" ]]; then
+        check_homebrew
+    fi
+
     for pkg in zsh tmux git curl wget; do
         if install_if_missing "$pkg" "$pkg"; then continue; fi
         info "Installing $pkg..."
@@ -254,7 +295,26 @@ install_core() {
 install_cli_tools() {
     step "CLI Tools — fzf, fd, eza, bat, dust, btop, neovim"
 
-    if [[ "$PLATFORM" == "arch" ]]; then
+    if [[ "$PLATFORM" == "macos" ]]; then
+        declare -A tools=(
+            [fzf]=fzf
+            [fd]=fd
+            [eza]=eza
+            [bat]=bat
+            [dust]=dust
+            [btop]=btop
+            [nvim]=neovim
+        )
+        for cmd in "${!tools[@]}"; do
+            if install_if_missing "$cmd" "${tools[$cmd]}"; then continue; fi
+            info "Installing ${tools[$cmd]}..."
+            pkg_install "${tools[$cmd]}" && success "${tools[$cmd]} installed" || error "Failed to install ${tools[$cmd]}"
+        done
+        if cmd_exists nvim && ! nvim_meets_min; then
+            warn "neovim $(nvim_version) is below required ${NVIM_MIN_VERSION} — run: brew upgrade neovim"
+        fi
+
+    elif [[ "$PLATFORM" == "arch" ]]; then
         declare -A tools=(
             [fzf]=fzf
             [fd]=fd
@@ -342,7 +402,14 @@ install_cli_tools() {
 install_shell_enhancements() {
     step "Shell Enhancements — starship, zoxide, atuin, lazygit"
 
-    if [[ "$PLATFORM" == "arch" ]]; then
+    if [[ "$PLATFORM" == "macos" ]]; then
+        for tool in starship zoxide atuin lazygit; do
+            if install_if_missing "$tool"; then continue; fi
+            info "Installing $tool..."
+            pkg_install "$tool" && success "$tool installed" || error "Failed to install $tool"
+        done
+
+    elif [[ "$PLATFORM" == "arch" ]]; then
         detect_aur_helper
 
         for tool in starship zoxide; do
@@ -435,7 +502,9 @@ install_dev_tools() {
 
     if ! install_if_missing fnm; then
         info "Installing fnm..."
-        if [[ "$PLATFORM" == "arch" ]]; then
+        if [[ "$PLATFORM" == "macos" ]]; then
+            pkg_install fnm && success "fnm installed" || error "Failed to install fnm"
+        elif [[ "$PLATFORM" == "arch" ]]; then
             detect_aur_helper
             if ! pkg_install fnm 2>/dev/null; then
                 aur_install fnm && success "fnm installed (AUR)" || {
@@ -455,7 +524,12 @@ install_dev_tools() {
 install_fonts() {
     step "Fonts — JetBrains Mono Nerd Font"
 
-    local font_dir="$HOME/.local/share/fonts/JetBrainsMonoNF"
+    local font_dir
+    if [[ "$PLATFORM" == "macos" ]]; then
+        font_dir="$HOME/Library/Fonts/JetBrainsMonoNF"
+    else
+        font_dir="$HOME/.local/share/fonts/JetBrainsMonoNF"
+    fi
 
     if [[ -d "$font_dir" ]] && ls "$font_dir"/*.ttf &>/dev/null; then
         dim "JetBrains Mono Nerd Font already installed — skipping"
@@ -474,7 +548,7 @@ install_fonts() {
     tar xf "$tmp_dir/JetBrainsMono.tar.xz" -C "$font_dir"
     rm -rf "$tmp_dir"
 
-    if cmd_exists fc-cache; then
+    if [[ "$PLATFORM" != "macos" ]] && cmd_exists fc-cache; then
         fc-cache -fv "$font_dir" >> "$LOG_FILE" 2>&1
     fi
     success "JetBrains Mono Nerd Font installed to $font_dir"
@@ -591,6 +665,10 @@ main() {
         else
             warn "No AUR helper detected (paru/yay) — some packages may need manual install"
         fi
+    elif [[ "$PLATFORM" == "macos" ]]; then
+        if cmd_exists brew; then
+            dim "Homebrew: $(brew --version | head -1)"
+        fi
     fi
 
     show_summary
@@ -629,6 +707,7 @@ main() {
         case "$PKG_MGR" in
             pacman) sudo pacman -Sy >> "$LOG_FILE" 2>&1 && success "Package index updated" ;;
             apt)    sudo apt-get update >> "$LOG_FILE" 2>&1 && success "Package index updated" ;;
+            brew)   brew update >> "$LOG_FILE" 2>&1 && success "Homebrew updated" ;;
         esac
     fi
 

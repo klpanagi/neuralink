@@ -101,13 +101,21 @@ theme() {
   # ── Ghostty ──
   local gcfg="${HOME}/.config/ghostty/config"
   if [[ -f "$gcfg" ]]; then
-    sed --follow-symlinks -i "s/^theme = .*/theme = ${ghostty_names[$key]}/" "$gcfg"
+    if [[ "$(uname)" == "Darwin" ]]; then
+      sed -i '' "s/^theme = .*/theme = ${ghostty_names[$key]}/" "$gcfg"
+    else
+      sed --follow-symlinks -i "s/^theme = .*/theme = ${ghostty_names[$key]}/" "$gcfg"
+    fi
   fi
 
   # ── Starship ──
   local scfg="${HOME}/.config/starship.toml"
   if [[ -f "$scfg" ]]; then
-    sed --follow-symlinks -i "s/^palette = .*/palette = \"${key//-/_}\"/" "$scfg"
+    if [[ "$(uname)" == "Darwin" ]]; then
+      sed -i '' "s/^palette = .*/palette = \"${key//-/_}\"/" "$scfg"
+    else
+      sed --follow-symlinks -i "s/^palette = .*/palette = \"${key//-/_}\"/" "$scfg"
+    fi
   fi
 
   # ── Tmux ──
