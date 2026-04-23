@@ -216,19 +216,38 @@ command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 [ -f "${HOME}/.gcp/env.bash" ] && source ~/.gcp/env.bash
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-if [[ "$(uname)" == "Darwin" ]]; then
-  _pkg="brew install"
-else
-  _distro_id=$(. /etc/os-release 2>/dev/null && echo "${ID:-}")
-  case "$_distro_id" in
-    arch|manjaro|endeavouros|garuda|cachyos) _pkg="pacman -S" ;;
-    ubuntu|debian|pop|linuxmint|elementary|zorin) _pkg="apt install" ;;
-    *) _pkg="your package manager to install" ;;
+() {
+  local _distro=""
+  if [[ "$(uname)" == "Darwin" ]]; then
+    _distro="macos"
+  else
+    _distro=$(. /etc/os-release 2>/dev/null && echo "${ID:-}")
+  fi
+
+  case "$_distro" in
+    macos)
+      command -v fd       >/dev/null 2>&1 || echo "[WARNING]: fd missing! Install: brew install fd"
+      command -v fzf      >/dev/null 2>&1 || echo "[WARNING]: fzf missing! Install: brew install fzf"
+      command -v eza      >/dev/null 2>&1 || echo "[WARNING]: eza missing! Install: brew install eza"
+      command -v starship >/dev/null 2>&1 || echo "[WARNING]: starship missing! Install: brew install starship"
+      ;;
+    arch|manjaro|endeavouros|garuda|cachyos)
+      command -v fd       >/dev/null 2>&1 || echo "[WARNING]: fd missing! Install: pacman -S fd"
+      command -v fzf      >/dev/null 2>&1 || echo "[WARNING]: fzf missing! Install: pacman -S fzf"
+      command -v eza      >/dev/null 2>&1 || echo "[WARNING]: eza missing! Install: pacman -S eza"
+      command -v starship >/dev/null 2>&1 || echo "[WARNING]: starship missing! Install: pacman -S starship"
+      ;;
+    ubuntu|debian|pop|linuxmint|elementary|zorin)
+      command -v fd       >/dev/null 2>&1 || echo "[WARNING]: fd missing! Install: apt install fd-find  (then: ln -sf \$(which fdfind) ~/.local/bin/fd)"
+      command -v fzf      >/dev/null 2>&1 || echo "[WARNING]: fzf missing! Install: apt install fzf"
+      command -v eza      >/dev/null 2>&1 || echo "[WARNING]: eza missing! Install: cargo install eza  (not in apt — or re-run ~/.neuralink/install.sh)"
+      command -v starship >/dev/null 2>&1 || echo "[WARNING]: starship missing! Install: curl -fsSL https://starship.rs/install.sh | sh"
+      ;;
+    *)
+      command -v fd       >/dev/null 2>&1 || echo "[WARNING]: fd missing! Re-run: ~/.neuralink/install.sh"
+      command -v fzf      >/dev/null 2>&1 || echo "[WARNING]: fzf missing! Re-run: ~/.neuralink/install.sh"
+      command -v eza      >/dev/null 2>&1 || echo "[WARNING]: eza missing! Re-run: ~/.neuralink/install.sh"
+      command -v starship >/dev/null 2>&1 || echo "[WARNING]: starship missing! Re-run: ~/.neuralink/install.sh"
+      ;;
   esac
-  unset _distro_id
-fi
-command -v fd >/dev/null 2>&1 || echo "[WARNING]: fd missing! Install: $_pkg fd"
-command -v fzf >/dev/null 2>&1 || echo "[WARNING]: fzf missing! Install: $_pkg fzf"
-command -v eza >/dev/null 2>&1 || echo "[WARNING]: eza missing! Install: $_pkg eza"
-command -v starship >/dev/null 2>&1 || echo "[WARNING]: starship missing! Install: $_pkg starship"
-unset _pkg
+}
