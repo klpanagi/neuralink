@@ -276,6 +276,34 @@ install_core() {
         pkg_install "$pkg" && success "$pkg installed" || error "Failed to install $pkg"
     done
 
+    info "Ensuring build tools (make + C compiler) for native plugins..."
+    case "$PLATFORM" in
+        arch)
+            if ! pacman -Q base-devel &>/dev/null 2>&1; then
+                sudo pacman -S --noconfirm --needed base-devel >> "$LOG_FILE" 2>&1 \
+                    && success "base-devel installed" || warn "Failed to install base-devel — some plugins may not build"
+            else
+                dim "base-devel already installed"
+            fi
+            ;;
+        debian)
+            if ! dpkg -s build-essential &>/dev/null 2>&1; then
+                sudo apt-get install -y build-essential >> "$LOG_FILE" 2>&1 \
+                    && success "build-essential installed" || warn "Failed to install build-essential — some plugins may not build"
+            else
+                dim "build-essential already installed"
+            fi
+            ;;
+        macos)
+            if ! cmd_exists make || ! cmd_exists cc; then
+                warn "Xcode Command Line Tools required for native plugins."
+                warn "Run: xcode-select --install"
+            else
+                dim "Xcode CLT already present"
+            fi
+            ;;
+    esac
+
     if [[ "$SHELL" != *"zsh"* ]]; then
         if ask "Set zsh as your default shell?"; then
             if chsh -s "$(which zsh)"; then
