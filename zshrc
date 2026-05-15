@@ -251,3 +251,10 @@ command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
       ;;
   esac
 }
+
+# bun completions
+[ -s "/home/klpanagi/.bun/_bun" ] && source "/home/klpanagi/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
