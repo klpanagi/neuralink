@@ -1,7 +1,7 @@
 # Starship prompt — Catppuccin Mocha palette
 # https://starship.rs/config/
 
-palette = "catppuccin_mocha"
+palette = "rose_pine"
 
 command_timeout = 2000
 
@@ -311,3 +311,32 @@ surface0 = "#232136"
 base = "#191724"
 mantle = "#16141f"
 crust = "#12101a"
+
+[palettes.aura]
+# Aura Theme (daltonmenezes)
+rosewater = "#ffca85"
+flamingo = "#f694ff"
+pink = "#f694ff"
+mauve = "#a277ff"
+red = "#ff6767"
+maroon = "#ff6767"
+peach = "#ffca85"
+yellow = "#ffca85"
+green = "#61ffca"
+teal = "#61ffca"
+sky = "#82e2ff"
+sapphire = "#82e2ff"
+blue = "#a277ff"
+lavender = "#a277ff"
+text = "#edecee"
+subtext1 = "#d4d2d2"
+subtext0 = "#b8b8b8"
+overlay2 = "#6d6d6d"
+overlay1 = "#5a5a5a"
+overlay0 = "#4d4d4d"
+surface2 = "#3d3d3d"
+surface1 = "#2a2834"
+surface0 = "#242329"
+base = "#15141b"
+mantle = "#110f18"
+crust = "#0d0c12"

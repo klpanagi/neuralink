@@ -11,7 +11,7 @@
 theme() {
   local -a keys=(
     catppuccin-mocha dracula tokyo-night gruvbox-dark
-    nord one-dark solarized-dark rose-pine
+    nord one-dark solarized-dark rose-pine aura
   )
 
   local -A labels=(
@@ -23,6 +23,7 @@ theme() {
     [one-dark]="One Dark"
     [solarized-dark]="Solarized Dark"
     [rose-pine]="Rosé Pine"
+    [aura]="Aura"
   )
 
   # Ghostty theme names (verified via ghostty +list-themes)
@@ -35,6 +36,7 @@ theme() {
     [one-dark]="Atom One Dark"
     [solarized-dark]="Builtin Solarized Dark"
     [rose-pine]="Rose Pine"
+    [aura]="Aura"
   )
 
   # Tmux color overrides: bg,fg,accent,dim (empty = catppuccin plugin defaults)
@@ -47,6 +49,7 @@ theme() {
     [one-dark]="#282c34,#abb2bf,#61afef,#3e4452"
     [solarized-dark]="#002b36,#839496,#268bd2,#073642"
     [rose-pine]="#191724,#e0def4,#c4a7e7,#26233a"
+    [aura]="#15141b,#edecee,#a277ff,#2a2834"
   )
 
   local state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/neuralink"
@@ -163,6 +166,7 @@ _theme_completion() {
     'one-dark:One Dark'
     'solarized-dark:Solarized Dark'
     'rose-pine:Rosé Pine'
+    'aura:Aura'
   )
   _describe 'command' subcmds -- themes
 }
