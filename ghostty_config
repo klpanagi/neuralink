@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------------
 
 # --- Appearance ---
-theme = Catppuccin Mocha
+theme = Rose Pine
 
 font-family = "JetBrains Mono"
 font-size = 11
